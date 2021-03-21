@@ -26,18 +26,18 @@ order by function_name;
 
 -- products
 select distinct pc.product_id,
-                product_name,
-                amount_in_magazine,
-                amount_max,
-                (select category_name + ','
-                 from categories as ca
-                          inner join product_categories p on ca.category_id = p.category_id
-                 where p.product_id = pc.product_id
-    for XML PATH('')) as categories,
+    product_name,
+    amount_in_magazine,
+    amount_max,
+    (select category_name + ','
+        from categories as ca
+            inner join product_categories p on ca.category_id = p.category_id
+        where p.product_id = pc.product_id
+        for XML PATH('')) as categories,
     (select cast(quantity as varchar(10)) + ','
-from available_quantities as ava
-where ava.product_id = pc.product_id
-    for XML PATH('')) as avail_quantities,
+        from available_quantities as ava
+        where ava.product_id = pc.product_id
+        for XML PATH('')) as avail_quantities,
     unit_name,
     cast(price as decimal(10, 2)) as price,
     supplier_abbr,
@@ -52,17 +52,17 @@ from products
 -- cooperator's order history
 select first_name, last_name, order_stop_date, concat(cast(sum(price) as decimal(10, 2)), ' zl'), order_status_name
 from cooperators as c
-         left join ordered_items oi on c.coop_id = oi.coop_id
-         left join products pr on oi.product_id = pr.product_id
-         left join order_status os on oi.order_status_id = os.order_status_id
-         left join orders o on oi.order_id = o.order_id
+     left join ordered_items oi on c.coop_id = oi.coop_id
+     left join products pr on oi.product_id = pr.product_id
+     left join order_status os on oi.order_status_id = os.order_status_id
+     left join orders o on oi.order_id = o.order_id
 where c.coop_id = 1
 group by first_name, last_name, c.coop_id, order_stop_date, order_status_name;
 
 -- suppliers
 select supplier_name, supplier_abbr, s.email, s.phone, order_closing_date, (first_name + ' ' + last_name) as OpRo
 from suppliers as s
-         inner join cooperators c on s.opro_id = c.coop_id;
+     inner join cooperators c on s.opro_id = c.coop_id;
 
 -- orders/baskets
 select first_name, last_name, basket_id
