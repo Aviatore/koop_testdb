@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 
 #nullable disable
 
@@ -10,11 +11,13 @@ namespace Koop.Models
     {
         public koopTmpContext()
         {
+            
         }
 
         public koopTmpContext(DbContextOptions<koopTmpContext> options)
             : base(options)
         {
+
         }
 
         public virtual DbSet<AvailableQuantity> AvailableQuantities { get; set; }
@@ -33,19 +36,35 @@ namespace Koop.Models
         public virtual DbSet<Unit> Units { get; set; }
         public virtual DbSet<Work> Works { get; set; }
         public virtual DbSet<WorkType> WorkTypes { get; set; }
+        public virtual DbSet<CoopOrderHistory> CoopOrderHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=koop;User ID=SA;Password=Gtm#Dpi7zwt;");
+                optionsBuilder
+                    .UseSqlServer("Server=localhost;Database=koop;User ID=SA;Password=Gtm#Dpi7zwt;");
             }
+
+            optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information).EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+
+            modelBuilder.Entity<CoopOrderHistory>(entity =>
+            {
+                entity.ToView("coop_order_history_view");
+                entity.HasNoKey();
+                entity.Property(e => e.CoopId).HasColumnName("coop_id");
+                entity.Property(e => e.Price).HasColumnName("price");
+                entity.Property(e => e.FirstName).HasColumnName("first_name");
+                entity.Property(e => e.LastName).HasColumnName("last_name");
+                entity.Property(e => e.OrderStatusName).HasColumnName("order_status_name");
+                entity.Property(e => e.OrderStopDate).HasColumnName("order_stop_date");
+            });
 
             modelBuilder.Entity<AvailableQuantity>(entity =>
             {

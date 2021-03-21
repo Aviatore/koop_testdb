@@ -72,3 +72,16 @@ order by basket_id;
 
 -- paczkers' data
 -- select product_name, 
+
+
+
+create or alter view coop_order_history_view as
+select c.coop_id, first_name, last_name, order_stop_date, concat(cast(sum(price) as decimal(10, 2)), ' zl') as price, order_status_name
+from cooperators as c
+         left join ordered_items oi on c.coop_id = oi.coop_id
+         left join products pr on oi.product_id = pr.product_id
+         left join order_status os on oi.order_status_id = os.order_status_id
+         left join orders o on oi.order_id = o.order_id
+group by first_name, last_name, c.coop_id, order_stop_date, order_status_name;
+
+select * from coop_order_history_view;
